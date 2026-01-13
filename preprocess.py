@@ -14,16 +14,11 @@ normalization_dict = {
 
 def clean_text(text):
     if not isinstance(text, str): return ""
-    # Chuẩn hóa Unicode và viết thường
     text = unicodedata.normalize('NFC', text.lower())
-    # Xóa link và email
     text = re.sub(r'https?://\S+|www\.\S+ search', '', text)
-    # Thay teencode
     words = text.split()
     text = " ".join([normalization_dict.get(w, w) for w in words])
-    # Chỉ giữ lại chữ cái tiếng Việt, số và khoảng trắng
     text = re.sub(r'[^\s\wáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệóòỏõọôốồổỗộơớờởỡợíìỉĩịúùủũụưứừửữựýỳỷỹỵđ]', ' ', text)
-    # Tách từ tiếng Việt
     text = word_tokenize(text, format="text")
     return text.strip()
 

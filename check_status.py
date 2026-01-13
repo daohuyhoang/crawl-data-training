@@ -22,7 +22,6 @@ def main():
     print(f"{Fore.CYAN}║        TRẠNG THÁI HỆ THỐNG DỮ LIỆU          ║{Style.RESET_ALL}")
     print(f"{Fore.CYAN}╚═══════════════════════════════════════════════╝{Style.RESET_ALL}\n")
     
-    # Kiểm tra crawled_fb.csv
     exists, count = check_file_status('crawled_fb.csv')
     if exists:
         if count > 0:
@@ -33,7 +32,6 @@ def main():
     else:
         print(f"{Fore.RED}✗ crawled_fb.csv: Không tồn tại{Style.RESET_ALL}")
     
-    # Kiểm tra labeled_data_bert.csv
     exists, count = check_file_status('labeled_data_bert.csv')
     if exists:
         if count > 0:
@@ -52,7 +50,6 @@ def main():
     else:
         print(f"\n{Fore.RED}✗ labeled_data_bert.csv: Không tồn tại{Style.RESET_ALL}")
     
-    # Kiểm tra model files
     print(f"\n{Fore.CYAN}--- Model Files ---{Style.RESET_ALL}")
     model_files = ['sentiment_model.pkl', 'tfidf_vectorizer.pkl']
     for mf in model_files:

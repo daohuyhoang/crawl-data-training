@@ -31,21 +31,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 def is_junk(text):
-    # 1. Lọc các dòng chỉ có ký tự đặc biệt hoặc quá nhiều ký tự lạ
     if not text or len(text.strip()) < 10:
         return True
     
-    # Ký tự lạ/spam như 웃➫, ♫♯, [r]
     junk_patterns = [r'웃➫', r'♫♯', r'\[r\]', r'♗', r'➫']
     for p in junk_patterns:
         if re.search(p, text):
             return True
             
-    # 2. Lọc quảng cáo (số điện thoại, Hotline, Zalo)
     if re.search(r'0\d{9,10}', text) or "Hotline" in text or "Zalo" in text or "MIỄN PHÍ" in text:
         return True
         
-    # 3. Lọc các câu có quá nhiều ký tự đặc biệt (> 30% nội dung)
     special_chars = len(re.sub(r'[\w\s,.]', '', text))
     if special_chars / len(text) > 0.3:
         return True
@@ -66,7 +62,6 @@ def crawl_fb_comments(post_url, max_comments=5000):
         print("Bạn có 30 giây để chuẩn bị...")
         time.sleep(30)
         
-        # Thử chuyển sang chế độ "Tất cả bình luận"
         try:
             filters = [
                 "//span[contains(text(),'Phù hợp nhất') or contains(text(),'Most relevant')]",
@@ -94,7 +89,6 @@ def crawl_fb_comments(post_url, max_comments=5000):
         no_new_retry = 0
         
         while len(comments_data) < max_comments:
-            # 1. Click "Xem thêm"
             see_more_xpaths = [
                 "//span[contains(text(), 'Xem thêm bình luận')]",
                 "//span[contains(text(), 'View more comments')]",
@@ -112,11 +106,9 @@ def crawl_fb_comments(post_url, max_comments=5000):
                     except:
                         continue
 
-            # 2. Cuộn dần
             driver.execute_script("window.scrollBy(0, 1500);")
             time.sleep(2)
 
-            # 3. Lấy dữ liệu
             articles = driver.find_elements(By.CSS_SELECTOR, "div[role='article']")
             for art in articles:
                 try:
@@ -133,7 +125,7 @@ def crawl_fb_comments(post_url, max_comments=5000):
             
             if current_count == last_count:
                 no_new_retry += 1
-                if no_new_retry > 8: # Tăng số lần thử lên cho chắc
+                if no_new_retry > 8:
                     print("=> Hết bình luận có thể lấy.")
                     break
             else:
@@ -144,15 +136,12 @@ def crawl_fb_comments(post_url, max_comments=5000):
     except Exception as e:
         print(f"Lỗi: {e}")
     finally:
-        # Lưu vào file (Chế độ APPEND - cộng dồn)
         save_file = 'crawled_fb.csv'
         new_df = pd.DataFrame(list(comments_data), columns=['text'])
-        # Không gán nhãn ở đây - sẽ gán bằng BERT sau
         
         if not os.path.isfile(save_file):
             new_df.to_csv(save_file, index=False, encoding='utf-8-sig')
         else:
-            # Đọc file cũ để tránh trùng lặp khi append
             old_df = pd.read_csv(save_file)
             combined_df = pd.concat([old_df, new_df]).drop_duplicates(subset=['text'])
             combined_df.to_csv(save_file, index=False, encoding='utf-8-sig')

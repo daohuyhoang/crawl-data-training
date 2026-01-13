@@ -5,24 +5,19 @@ from colorama import init, Fore, Style
 init()
 
 def predict_sentiment(text, verbose=True):
-    # 1. Load model and vectorizer
     model = joblib.load('sentiment_model.pkl')
     tfidf = joblib.load('tfidf_vectorizer.pkl')
     
-    # 2. Preprocess input
     cleaned_text = clean_text(text)
     if verbose:
         print(f"Text gốc: {text}")
         print(f"Text đã xử lý: {cleaned_text}")
     
-    # 3. Vectorize
     vectorized_text = tfidf.transform([cleaned_text])
     
-    # 4. Predict
     prediction = model.predict(vectorized_text)[0]
     proba = model.predict_proba(vectorized_text)[0]
     
-    # Map label back to text (ĐÚNG THEO YÊU CẦU: 0=Tiêu cực, 1=Khác, 2=Tích cực)
     label_map = {0: "Tiêu cực", 1: "Khác", 2: "Tích cực"}
     label_color = {0: Fore.RED, 1: Fore.YELLOW, 2: Fore.GREEN}
     
@@ -43,7 +38,6 @@ if __name__ == "__main__":
     print(f"{Fore.CYAN}║       DỰ ĐOÁN SENTIMENT TIẾNG VIỆT          ║{Style.RESET_ALL}")
     print(f"{Fore.CYAN}╚═══════════════════════════════════════════════╝{Style.RESET_ALL}\n")
     
-    # Test với vài câu mẫu
     test_samples = [
         "Quán này ngon lắm, rất đáng thử!",
         "Dở tệ, không bao giờ quay lại",
@@ -56,7 +50,6 @@ if __name__ == "__main__":
         predict_sentiment(sample)
         print()
     
-    # Interactive mode
     print(f"\n{Fore.CYAN}=== CHẾ ĐỘ TƯƠNG TÁC ==={Style.RESET_ALL}")
     print("Nhập 'q' để thoát\n")
     

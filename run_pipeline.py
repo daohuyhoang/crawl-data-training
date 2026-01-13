@@ -34,26 +34,20 @@ def main():
     choice = input("\nNhập lựa chọn (1/2/3): ").strip()
     
     if choice == '1':
-        # Chỉ crawl
         run_command("python fb_scraper.py", "BƯỚC 1: CRAWL DỮ LIỆU TỪ FACEBOOK")
         
     elif choice == '2':
-        # Chỉ gán nhãn
         run_command("python auto_label_bert.py", "BƯỚC 2: GÁN NHÃN TỰ ĐỘNG BẰNG PHOBERT")
         
     elif choice == '3':
-        # Pipeline đầy đủ
         print(f"\n{Fore.YELLOW}Bắt đầu pipeline đầy đủ...{Style.RESET_ALL}")
         
-        # Bước 1: Crawl
         if run_command("python fb_scraper.py", "BƯỚC 1: CRAWL DỮ LIỆU TỪ FACEBOOK"):
             print(f"\n{Fore.GREEN}✓ Crawl hoàn thành!{Style.RESET_ALL}")
             
-            # Hỏi có muốn gán nhãn ngay không
             proceed = input(f"\n{Fore.YELLOW}Tiếp tục gán nhãn? (y/n): {Style.RESET_ALL}").strip().lower()
             
             if proceed == 'y':
-                # Bước 2: Gán nhãn
                 if run_command("python auto_label_bert.py", "BƯỚC 2: GÁN NHÃN TỰ ĐỘNG BẰNG PHOBERT"):
                     print(f"\n{Fore.GREEN}✓ Pipeline hoàn thành!{Style.RESET_ALL}")
                     print(f"\n{Fore.CYAN}Dữ liệu đã được lưu vào: labeled_data_bert.csv{Style.RESET_ALL}")

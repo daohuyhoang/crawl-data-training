@@ -16,22 +16,18 @@ def train_model(data_path):
     print(f"{Fore.CYAN}║           TRAIN SENTIMENT MODEL              ║{Style.RESET_ALL}")
     print(f"{Fore.CYAN}╚═══════════════════════════════════════════════╝{Style.RESET_ALL}\n")
     
-    # 1. Load data
     df = pd.read_csv(data_path)
     print(f"Loaded {len(df)} samples.")
     
-    # Thống kê phân bố nhãn
     print(f"\n{Fore.CYAN}Phân bố nhãn:{Style.RESET_ALL}")
     label_counts = df['label'].value_counts().sort_index()
     for label, count in label_counts.items():
         label_name = ['Tiêu cực', 'Khác', 'Tích cực'][label]
         print(f"  {label} ({label_name}): {count} ({count/len(df)*100:.1f}%)")
     
-    # 2. Preprocess
     print(f"\n{Fore.YELLOW}Preprocessing text...{Style.RESET_ALL}")
     df['clean_text'] = df['text'].apply(clean_text)
     
-    # 3. Split data
     X = df['clean_text']
     y = df['label']
     
@@ -39,18 +35,16 @@ def train_model(data_path):
         X, y, test_size=0.2, random_state=42, stratify=y
     )
     
-    # 4. Vectorization (TF-IDF)
     print(f"{Fore.YELLOW}Vectorizing...{Style.RESET_ALL}")
     tfidf = TfidfVectorizer(
-        ngram_range=(1, 3),  # Tăng lên 3-gram để bắt pattern tốt hơn
-        max_features=10000,   # Tăng features
-        min_df=2,             # Bỏ từ xuất hiện quá ít
-        max_df=0.8            # Bỏ từ xuất hiện quá nhiều
+        ngram_range=(1, 3),
+        max_features=10000,
+        min_df=2,
+        max_df=0.8
     )
     X_train_tfidf = tfidf.fit_transform(X_train)
     X_test_tfidf = tfidf.transform(X_test)
     
-    # 5. Tính class weights để cân bằng
     class_weights = compute_class_weight(
         'balanced',
         classes=np.unique(y_train),
@@ -63,18 +57,16 @@ def train_model(data_path):
         label_name = ['Tiêu cực', 'Khác', 'Tích cực'][label]
         print(f"  {label} ({label_name}): {weight:.2f}")
     
-    # 6. Train Model với class_weight
     print(f"\n{Fore.YELLOW}Training model...{Style.RESET_ALL}")
     model = LogisticRegression(
         max_iter=2000,
-        class_weight=class_weight_dict,  # Cân bằng classes
-        C=1.0,                            # Regularization
+        class_weight=class_weight_dict, 
+        C=1.0,
         solver='lbfgs',
         random_state=42
     )
     model.fit(X_train_tfidf, y_train)
     
-    # 7. Evaluate
     y_pred = model.predict(X_test_tfidf)
     
     print(f"\n{Fore.GREEN}=== KẾT QUẢ ĐÁNH GIÁ ==={Style.RESET_ALL}")
@@ -84,7 +76,6 @@ def train_model(data_path):
     
     print(f"\n{Fore.GREEN}Accuracy: {accuracy_score(y_test, y_pred):.4f}{Style.RESET_ALL}")
     
-    # Confusion Matrix
     cm = confusion_matrix(y_test, y_pred)
     print(f"\n{Fore.CYAN}Confusion Matrix:{Style.RESET_ALL}")
     print("              Predicted")
@@ -93,21 +84,10 @@ def train_model(data_path):
         label_name = ['Tiêu cực', 'Khác    ', 'Tích cực'][i]
         print(f"Actual {label_name}  {row[0]:6d}  {row[1]:4d}  {row[2]:6d}")
     
-    # 8. Save model and vectorizer
     joblib.dump(model, 'sentiment_model.pkl')
     joblib.dump(tfidf, 'tfidf_vectorizer.pkl')
     print(f"\n{Fore.GREEN}✓ Model saved to sentiment_model.pkl{Style.RESET_ALL}")
     print(f"{Fore.GREEN}✓ Vectorizer saved to tfidf_vectorizer.pkl{Style.RESET_ALL}")
-    
-    # 9. Test với vài mẫu
-    print(f"\n{Fore.CYAN}=== TEST VỚI MẪU ==={Style.RESET_ALL}")
-    test_samples = [
-        "Quán này ngon lắm, rất đáng thử!",
-        "Dở tệ, không bao giờ quay lại",
-        "Bình thường thôi",
-        "Ngon",
-        "Chán"
-    ]
     
     for sample in test_samples:
         cleaned = clean_text(sample)
